@@ -30,7 +30,7 @@ def check_avoids(names, avoids, avoid_type, ignore="") :
         for infix in avoids["infix"] :
             if infix in ignore :
                 pass
-            elif (infix.lower() in name[1:-1].lower()) or (len(infix) == 1 and infix.lower() in name.lower()) or avoid_type == "project" and infix.lower() in name.lower():
+            elif (infix.lower() in name.lower()):# or (len(infix) == 1 and infix.lower() in name.lower()) or avoid_type == "project" and infix.lower() in name.lower():
                 line = "<span>"
                 pos = (name.lower()).index(infix.lower())
                 hits += 1

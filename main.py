@@ -109,6 +109,7 @@ class MainWindow(QMainWindow):
 
     # Allows user to sort their imput names
     def sort_names(self):
+        self.save_names()
         self.created_names.sort()
         self.ui.textEdit_names.setPlainText("\n".join(self.created_names))
 
@@ -151,7 +152,7 @@ class MainWindow(QMainWindow):
 
             # Check names against INN avoids - return html text with avoid highlighted in red within name
             if self.ui.check_box_inn.isChecked() :
-                text += "<h4>INN Stem Conflicts</h4>" + check_avoids(self.stripped_names, self.inn_avoids, "inn", ignore)
+                text += "<h4>INN Avoid Conflicts</h4>" + check_avoids(self.stripped_names, self.inn_avoids, "inn", ignore)
                 checks += 1
 
             # Check names against Pharma avoids - return html text with avoid highlighted in red within name
