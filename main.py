@@ -215,8 +215,6 @@ class MainWindow(QMainWindow):
         choice = QtGui.QMessageBox.question(self, "Quit", "Clear all avoids?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
 
         if choice == QtGui.QMessageBox.Yes :
-
-            print "Clearing avoids"
             with open("avoids.txt", "w")as f:
                 f.close()
             del self.project_avoids_list[:]
@@ -247,23 +245,28 @@ class MainWindow(QMainWindow):
 
     # Saves avoids input by the user
     def save_avoids(self):
-        print "Saving avoids"
         #First converts any special characters (e.g smart quotes to staright quotes or em dashes to regular deshes) then splits each item into a list
-        p_text=(str(self.ui.plainTextEdit_project.toPlainText()).replace(u"\u2018", '"').replace(u"\u2019", '"').\
-        replace(u"\u201c",'"').replace(u"\u201d", '"').replace(u"\u2013", "-")).split("\n")
+        text_in = (str(self.ui.plainTextEdit_project.toPlainText()).replace(u"\u2018", '"').replace(u"\u2019", '"').\
+        replace(u"\u201c",'"').replace(u"\u201d", '"').replace(u"\u2013", "-"))
+        p_text = "".join([x for x in text_in if x in string.letters or x == "\n" or x == "-" or x == '"' or x == "(" or x == " "])
 
         # Strip each avoid of any extra whitespace characters then send to build_project_avoids to get a sorted dictionary
-        self.project_avoids_list = [str(x).strip(string.whitespace) for x in p_text if x.strip()]
+        self.project_avoids_list = [str(x).strip(string.whitespace) for x in p_text.split("\n") if x.strip()]
         self.project_avoids = build_project_avoids(self.project_avoids_list)
+        self.project_avoids_list = \
+            [x.lower() + "-" for x in self.project_avoids["prefix"]] + \
+            ['"' + x.lower() + '"' for x in self.project_avoids["infix"]] + \
+            ["-" + x.lower() for x in self.project_avoids["suffix"]]
 
         # Take in all names listed under presented/internal names
-        i_text = str(self.ui.plainTextEdit_internal.toPlainText())
+        # text_in = str(self.ui.plainTextEdit_internal.toPlainText())
+        i_text = "".join([x for x in str(self.ui.plainTextEdit_internal.toPlainText()) if x in string.letters or x == "\n" or x == " "])
 
         # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
         self.internal_names = [x.strip(string.whitespace) for x in i_text.split("\n") if x.strip(string.whitespace)]
 
         # Take in all names listed under presented/internal names
-        c_text = str(self.ui.plainTextEdit_competitor.toPlainText())
+        c_text = "".join([x for x in str(self.ui.plainTextEdit_competitor.toPlainText()) if x in string.letters or x == "\n" or x == " "])
 
         # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
         self.competitor_names = [x.strip(string.whitespace) for x in c_text.split("\n") if x.strip(string.whitespace)]
@@ -305,7 +308,7 @@ class MainWindow(QMainWindow):
 
     def get_PIU(self) :
 
-        print "Getting PIU search keys..."
+        #print "Getting PIU search keys..."
         text = str(self.ui.names_text.toPlainText())
 
         names_list = [x.lower() for x in strip_names(text) if x.strip(string.whitespace)]
@@ -329,7 +332,7 @@ class MainWindow(QMainWindow):
         self.ui.names_text.setPlainText("\n".join(names_list))
 
     def get_structural(self) :
-        print "Getting structural search keys..."
+        #print "Getting structural search keys..."
         text = str(self.ui.names_text.toPlainText())
 
         names_list = [x.lower() for x in strip_names(text) if x.strip(string.whitespace)]

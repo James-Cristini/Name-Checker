@@ -44,6 +44,13 @@ def build_project_avoids(avoid_list):
     # Determine if avoids are prefix/infix/suffix and build the project_avoids dictionary accordingly
     for avoid in avoid_list:
 
+        if "(" in avoid:
+            line = avoid.split("(")
+            avoid = line[0]
+
+        if "-" in avoid and '"' in avoid:
+            avoid = avoid.strip(string.whitespace).strip('"')
+
         # Check for Infix first, if it starts and ends with a - or " it is an infix
         if avoid[0] == '"' and avoid[-1] == '"' or avoid[0] == '-' and avoid[-1] == '-':
             project_avoids["infix"].append(avoid.strip("-").strip('"'))

@@ -1,5 +1,7 @@
 import sys
 import string
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 def check_avoids(names, avoids, avoid_type, ignore="") :
 
@@ -95,6 +97,7 @@ def check_internal_names(names, internal_names):
 def check_competitor_names(names, competitor_names):
     html_text = "<p style =\" white-space: pre-wrap;\">"
     hits = 0
+    conflict_hits = []
     for name in names :
 
         html_text += "<span>"
