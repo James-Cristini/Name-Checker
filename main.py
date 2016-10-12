@@ -20,7 +20,13 @@ sys.setdefaultencoding('utf-8')
 class MainWindow(QMainWindow):
 
     # Set up our project specific avoids - these will load the last saved avoids on start
-    project_avoids = {}
+    project_avoids = {
+    "prefix" : [],
+    "infix" : [],
+    "suffix" : [],
+    "problems" : []
+    }
+
     project_avoids_list = []
     internal_names = []
     competitor_names = []
@@ -72,7 +78,7 @@ class MainWindow(QMainWindow):
         self.ui.sort_names_btn.clicked.connect(self.sort_names)
 
         # Set up text outputs with known avoids
-        self.get_avoids_at_start()
+        self.get_avoids_from_file()
         self.show_avoids()
         self.show_pharma_avoids()
         self.show_inn_avoids()
@@ -105,6 +111,8 @@ class MainWindow(QMainWindow):
         self.ui.textBrowser_url_status.setText("\n".join(self.url_names))
         self.ui.names_text.setPlainText("\n".join(self.stripped_names))
         self.ui.textBrowser_conflicts.clear()
+        self.ui.textEdit_names.setPlainText("\n".join(self.created_names))
+
 
 
     # Allows user to sort their imput names
@@ -174,7 +182,6 @@ class MainWindow(QMainWindow):
             if self.ui.check_box_competitor.isChecked() :
                 text += "<h4>Competitor Name Conflicts:</h4>" + check_competitor_names(self.stripped_names, self.competitor_names)
                 checks += 1
-
             if checks == 0 :
                 text +="<h4style \"font-weight:bold;\">No avoids checked!<h4>"
 
@@ -195,21 +202,23 @@ class MainWindow(QMainWindow):
             print "No: Not exiting..."
             pass
 
-    def get_avoids_at_start(self) :
+
+    def get_avoids_from_file(self) :
 
         # Check if
         try:
             with open("avoids.txt", "r") as f:
                 for line in f:
                     if line[0:4] == "Proj":
-                        self.project_avoids_list = line.strip("Project:").split(",")
+                        self.project_avoids_list = line.strip("Project:").strip(string.whitespace).split(",")
                     if line[0:4] == "Inte":
-                        self.internal_names = line.strip("Internal:").split(",")
+                        self.internal_names = line.strip("Internal:").strip(string.whitespace).split(",")
                     if line[0:4] == "Comp":
-                        self.competitor_names = line.strip("Competitor:").split(",")
+                        self.competitor_names = line.strip("Competitor:").strip(string.whitespace).split(",")
             f.close()
         except:
             pass
+
 
     def clear_avoids(self):
         choice = QtGui.QMessageBox.question(self, "Quit", "Clear all avoids?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
@@ -233,52 +242,57 @@ class MainWindow(QMainWindow):
         else :
             pass
 
+
     def show_avoids(self):
         if self.project_avoids_list :
             self.ui.plainTextEdit_project.setPlainText("\n".join(self.project_avoids_list))
         if self.internal_names :
-            self.ui.plainTextEdit_internal.setPlainText("\n".join(self.internal_names))
+            self.ui.plainTextEdit_internal.setPlainText("\n".join(sorted(set(self.internal_names))))
         if self.competitor_names :
-            self.ui.plainTextEdit_competitor.setPlainText("\n".join(self.competitor_names))
-
+            self.ui.plainTextEdit_competitor.setPlainText("\n".join(sorted(set(self.competitor_names))))
 
 
     # Saves avoids input by the user
     def save_avoids(self):
+
+        allowed_chars = string.letters + string.digits + '\n-"()/,'
+
         #First converts any special characters (e.g smart quotes to staright quotes or em dashes to regular deshes) then splits each item into a list
         text_in = (str(self.ui.plainTextEdit_project.toPlainText()).replace(u"\u2018", '"').replace(u"\u2019", '"').\
         replace(u"\u201c",'"').replace(u"\u201d", '"').replace(u"\u2013", "-"))
-        p_text = "".join([x for x in text_in if x in string.letters or x == "\n" or x == "-" or x == '"' or x == "(" or x == " "])
+
+        # Filters out any non-allowed characters
+        p_text = "".join([x for x in text_in if x in allowed_chars or x == " "])
 
         # Strip each avoid of any extra whitespace characters then send to build_project_avoids to get a sorted dictionary
         self.project_avoids_list = [str(x).strip(string.whitespace) for x in p_text.split("\n") if x.strip()]
         self.project_avoids = build_project_avoids(self.project_avoids_list)
         self.project_avoids_list = \
-            [x.lower() + "-" for x in self.project_avoids["prefix"]] + \
-            ['"' + x.lower() + '"' for x in self.project_avoids["infix"]] + \
-            ["-" + x.lower() for x in self.project_avoids["suffix"]]
+            sorted([x.lower() + "-" for x in self.project_avoids["prefix"]]) + \
+            sorted(['"' + x.lower() + '"' for x in self.project_avoids["infix"]]) + \
+            sorted(["-" + x.lower() for x in self.project_avoids["suffix"]]) + \
+            sorted([x for x in self.project_avoids["problems"]])
+
 
         # Take in all names listed under presented/internal names
-        # text_in = str(self.ui.plainTextEdit_internal.toPlainText())
-        i_text = "".join([x for x in str(self.ui.plainTextEdit_internal.toPlainText()) if x in string.letters or x == "\n" or x == " "])
-
-        # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
-        self.internal_names = [x.strip(string.whitespace) for x in i_text.split("\n") if x.strip(string.whitespace)]
+        if str(self.ui.plainTextEdit_internal.toPlainText()):
+            i_text = "".join([x for x in str(self.ui.plainTextEdit_internal.toPlainText()) if x in allowed_chars] or x == " ")
+            # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
+            self.internal_names = [x.strip(string.whitespace) for x in i_text.split("\n") if x or x.strip(string.whitespace)]
+        else:
+            self.internal_names = []
 
         # Take in all names listed under presented/internal names
-        c_text = "".join([x for x in str(self.ui.plainTextEdit_competitor.toPlainText()) if x in string.letters or x == "\n" or x == " "])
+        if str(self.ui.plainTextEdit_competitor.toPlainText()):
+            c_text = "".join([x for x in str(self.ui.plainTextEdit_competitor.toPlainText()) if x in allowed_chars or x == " "])
+            # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
+            self.competitor_names = [x.strip(string.whitespace) for x in c_text.split("\n") if x.strip(string.whitespace)]
+        else:
+            self.competitor_names = []
 
-        # Split text on the \n and strips whitespace leaving out any lines that are purely whitespace
-        self.competitor_names = [x.strip(string.whitespace) for x in c_text.split("\n") if x.strip(string.whitespace)]
-
-        self.project_avoids_list.sort()
-        self.project_avoids["prefix"].sort()
-        self.project_avoids["infix"].sort()
-        self.project_avoids["suffix"].sort()
-        self.internal_names.sort()
-        self.competitor_names.sort()
+        write_avoids(self.project_avoids_list, sorted(set(self.internal_names)), sorted(set(self.competitor_names)))
+        self.get_avoids_from_file()
         self.show_avoids()
-        write_avoids(self.project_avoids_list, self.internal_names, self.competitor_names)
 
 
     def show_pharma_avoids(self):
@@ -286,6 +300,7 @@ class MainWindow(QMainWindow):
         self.ui.textBrowser_pharma_prefix.setPlainText(text_list[0])
         self.ui.textBrowser_pharma_infix.setPlainText(text_list[1])
         self.ui.textBrowser_pharma_suffix.setPlainText(text_list[2])
+
 
     def show_inn_avoids(self):
         text_list = build_avoids_output(self.inn_avoids)
@@ -305,6 +320,7 @@ class MainWindow(QMainWindow):
             self.get_structural()
         else:
             self.get_PIU()
+
 
     def get_PIU(self) :
 
@@ -330,6 +346,7 @@ class MainWindow(QMainWindow):
 
         self.ui.parsed_text.setPlainText(search_key)
         self.ui.names_text.setPlainText("\n".join(names_list))
+
 
     def get_structural(self) :
         #print "Getting structural search keys..."

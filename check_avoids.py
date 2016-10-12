@@ -1,7 +1,5 @@
 import sys
 import string
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 
 def check_avoids(names, avoids, avoid_type, ignore="") :
 
@@ -10,9 +8,7 @@ def check_avoids(names, avoids, avoid_type, ignore="") :
     for name in names :
 
         for prefix in avoids["prefix"] :
-            if prefix in ignore :
-                pass
-            elif name[:len(prefix)].lower() == prefix.lower() :
+            if name[:len(prefix)].lower() == prefix.lower() :
                 html_text += "<span>"
                 pos = 0
                 hits += 1
@@ -83,6 +79,9 @@ def check_internal_names(names, internal_names):
     hits = 0
     for n in names:
         for i in internal_names :
+            if "(" in i:
+                i = i.split("(")[0].strip(string.whitespace)
+
             if n.lower() in i.lower() or i.lower() in n.lower():
                 hits += 1
                 line = n + " : <span style=\"color:#ff0000;\">"  + i + "</span>\n"
@@ -97,11 +96,19 @@ def check_internal_names(names, internal_names):
 def check_competitor_names(names, competitor_names):
     html_text = "<p style =\" white-space: pre-wrap;\">"
     hits = 0
+
     conflict_hits = []
     for name in names :
 
+        # if "(" in name:
+        #     name = name.split("(")[0].strip(string.whitespace)
+
         html_text += "<span>"
         for c in competitor_names :
+            c = c.strip("\n")
+            if "(" in c:
+                c = c.split("(")[0].strip(string.whitespace)
+
             # Check for similar prefixes
             if c[0:3].lower() == name[0:3].lower() :
                 prefix_hit = c[0:3]
