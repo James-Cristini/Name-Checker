@@ -1,3 +1,25 @@
+"""
+The name checker is intended for use by the verbal department within Addison Whitney;
+This program offers several major functionalities:
+1 - Takes in a list of created names as well as differet letter strings and existing names and checks the created naems against input avoids
+  - There are also two other avoids, INN and Pharma, the databases for these are not loaded in here for confidentiality purposes
+
+2 - Allows users to determine the .com domain name availability associated with each name using API request via Dynadot's application
+
+3 - Takes in a list of names and build search keys for those names for either PIU (phonetic screens) or structure, trademark screens
+
+There are
+
+The current UI design is inted for use on Windows and therefore looks slightly wonky on Mac
+"""
+
+__author__ = "James Cristini"
+__credits__ = ["James Cristini", 'Adam Tilly (for the "Cristini Genie" name)']
+__version__ = "1.3"
+__maintainer__ = "James Cristini"
+__email__ = "jacristi0428@gmail.com"
+
+
 import sys
 import sip
 import string
@@ -11,6 +33,7 @@ from check_domains import *
 from search_keys import *
 
 """
+command to convert .ui file to .py
 C:/Python27/Lib/site-packages/PyQt4/pyuic4.bat -x <UI FILE NAME>.ui -o <PYTHON FILE NAME>.py
 """
 
