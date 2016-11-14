@@ -13,11 +13,11 @@ After avoids are input and saved, users can paste in their created names. The na
 In addition to the due diligence, this program allows users to quickly determine the status and availability of the .com associated with each created name through the use of requests with the Dynadot API
 
 ###Search Keys
-Lastly, this program also offers the opportunity to quicken the search process when screenign names through an online trademark database. It willt ake in a list of names and break each down into the specific query needed for optimal searching
+Lastly, this program also offers the opportunity to quicken the search process when screening names through an online trademark database. It will take in a list of names and break each down into the specific query needed for optimal searching
 
 
 ###Main Tab 
-Inputting created names, selecting avoids to check, and viewing conflicts
+Inputing created names, selecting avoids to check, and viewing conflicts
 ![Picture](http://i.imgur.com/flSMGIy.png?1)
 
 ###Adding avoids
